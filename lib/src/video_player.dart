@@ -80,10 +80,12 @@ class VideoPlayer {
     // Set autoplay to false since most browsers won't autoplay a video unless it is muted
     _videoElement.setAttribute('autoplay', 'false');
 
-    if (await shouldUseHlsLibrary()) {
+    if (shouldUseHlsLibrary()) {
       try {
         _hls = Hls(
           HlsConfig(
+            //开启hls.js的debug日志
+            debug: false,
             xhrSetup: allowInterop(
               (HttpRequest xhr, String _) {
                 if (headers.isEmpty) {
@@ -127,11 +129,18 @@ class VideoPlayer {
         throw NoScriptTagException();
       }
     } else {
-      _videoElement.src = uri.toString();
-      _videoElement.addEventListener('durationchange', (_) {
-        if (_videoElement.duration == 0) {
-          return;
-        }
+      // _videoElement.src = uri.toString();
+      // _videoElement.addEventListener('durationchange', (_) {
+      //   if (_videoElement.duration == 0) {
+      //     return;
+      //   }
+      //   if (!_isInitialized) {
+      //     _isInitialized = true;
+      //     _sendInitialized();
+      //   }
+      // });
+
+      _videoElement.onCanPlay.listen((dynamic _) {
         if (!_isInitialized) {
           _isInitialized = true;
           _sendInitialized();
@@ -168,7 +177,8 @@ class VideoPlayer {
 
     _videoElement.onEnded.listen((dynamic _) {
       setBuffering(false);
-      _eventController.add(VideoEvent(eventType: VideoEventType.completed));
+      //出现死循环注释的，不知道原因
+      // _eventController.add(VideoEvent(eventType: VideoEventType.completed));
     });
   }
 
@@ -325,10 +335,24 @@ class VideoPlayer {
     return canPlayHls;
   }
 
-  Future<bool> shouldUseHlsLibrary() async {
-    return isSupported() &&
-        (uri.toString().contains('m3u8') || await _testIfM3u8()) &&
-        !canPlayHlsNatively();
+  bool shouldUseHlsLibrary() {
+    // return isSupported() &&
+    //     (uri.toString().contains('m3u8') || await _testIfM3u8()) &&
+    //     !canPlayHlsNatively();
+
+    //目前只适配:
+    //安卓手机:chrome
+    //苹果手机:safari
+
+    //hls.js不支持苹果的safari浏览器,Hls.isSupported()总是返回非true,
+    //安卓上的谷歌浏览器Hls.isSupported()大概率返回true.
+    //所以这里当Hls.isSupported()为true时,认为时安卓chrome浏览器,然后使用hls.js来处理视频播放;
+    //其他情况认为是苹果上的safari浏览器,使用html video标签来处理视频播放.
+
+    //HLS video embeds do not load on iphone
+    //https://github.com/video-dev/hls.js/issues/4354
+
+    return isSupported();
   }
 
   Future<bool> _testIfM3u8() async {

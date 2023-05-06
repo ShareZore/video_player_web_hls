@@ -81,7 +81,13 @@ class VideoPlayerPluginHls extends VideoPlayerPlatform {
       ..id = 'videoElement-$textureId'
       ..style.border = 'none'
       ..style.height = '100%'
-      ..style.width = '100%';
+      ..style.width = '100%'
+
+      //新增三个
+      ..src = uri
+      //这2个要一起设置
+      ..muted = true
+      ..controls = true;
 
     videoElement.attributes['playsinline'] = 'true';
 
@@ -89,14 +95,24 @@ class VideoPlayerPluginHls extends VideoPlayerPlatform {
     ui.platformViewRegistry.registerViewFactory(
         'videoPlayer-$textureId', (int viewId) => videoElement);
 
+    // final VideoPlayer player = VideoPlayer(
+    //     videoElement: videoElement,
+    //     uri: uri,
+    //     headers: headers ?? Map<String, String>());
+    //
+    // await player.initialize();
+    //
+    // _videoPlayers[textureId] = player;
+
     final VideoPlayer player = VideoPlayer(
         videoElement: videoElement,
         uri: uri,
-        headers: headers ?? Map<String, String>());
-
-    await player.initialize();
+        headers: headers ?? Map<String, String>())
+      ..initialize();
 
     _videoPlayers[textureId] = player;
+
+    return textureId;
 
     return textureId;
   }

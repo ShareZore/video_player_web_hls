@@ -30,10 +30,24 @@ class Hls {
 @JS()
 @anonymous
 class HlsConfig {
+  // @JS()
+  // external Function get xhrSetup;
+  //
+  // external factory HlsConfig({Function xhrSetup});
+
+  @JS()
+  external bool get debug;
+
   @JS()
   external Function get xhrSetup;
 
-  external factory HlsConfig({Function xhrSetup});
+  external factory HlsConfig({
+
+    bool debug,
+
+    Function xhrSetup
+
+  });
 }
 
 class ErrorData {
