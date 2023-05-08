@@ -352,7 +352,9 @@ class VideoPlayer {
     //HLS video embeds do not load on iphone
     //https://github.com/video-dev/hls.js/issues/4354
 
-    return isSupported();
+    //兼容MP4播放
+
+    return uri.toString().contains('mp4') ? false : isSupported();
   }
 
   Future<bool> _testIfM3u8() async {
